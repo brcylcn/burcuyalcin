@@ -1,6 +1,6 @@
 # Kampüs Etkinlikleri (Sprint 6 & Vize Teslimi)
 
-Vercel'de Yayında: https://burcuyalcin.vercel.app/
+Vercel'de Yayında: https://burcuyalcin-frontend.vercel.app/
 
 Bu proje, React Router, Context API ve Form yönetimi eklenerek tamamen tek sayfalık bir uygulamaya (SPA) dönüştürülmüştür.
 
