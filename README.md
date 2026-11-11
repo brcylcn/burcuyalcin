@@ -1,38 +1,66 @@
-# Kampüs Etkinlikleri (Sprint 6 & Vize Teslimi)
+Canlı site: https://burcuyalcin-frontend.vercel.app
 
-Vercel'de Yayında: https://burcuyalcin-frontend.vercel.app/
+# Kampüs Etkinlikleri
 
-Bu proje, React Router, Context API ve Form yönetimi eklenerek tamamen tek sayfalık bir uygulamaya (SPA) dönüştürülmüştür.
+Burcu Yalçın · C2221031010
 
-## 🚀 Özellikler
-- **React Router DOM (v6):** 10 farklı sayfa yapısı ve dinamik adresleme.
-- **Context API:** Tüm uygulama genelinde etkinlik verilerini (Ekleme, Silme, Güncelleme, Listeleme) merkezi bir state ile yönetme.
-- **Controlled Forms & Doğrulama:** Form validation (Kayıt, Giriş, Etkinlik Ekle/Güncelle).
-- **Responsive Yönetim Paneli:** Masaüstünde tablo, mobilde kart görünümüne geçen CSS yapısı.
+Fakültedeki seminer, atölye, söyleşi ve yarışmaları listeleyen web uygulaması. Repoda iki ayrı uygulama var: arayüzü gösteren **frontend** ve etkinlikleri JSON olarak veren **backend**.
 
-## 📦 Kurulum ve Çalıştırma
+| Klasör | Teknoloji | Adres | Durum |
+| --- | --- | --- | --- |
+| `frontend/` | React + TypeScript + Vite | `localhost:5173` · Vercel'de yayında | Sprint 4–6 |
+| `backend/` | Node.js + Express (REST API) | `localhost:3000` | Sprint 7 (canlıya alınmadı) |
 
-Projeyi yerelde çalıştırmak için:
+## Repo yapısı
 
-1. Bağımlılıkları yükleyin:
-   ```bash
-   npm install
-   ```
-2. Geliştirme sunucusunu başlatın:
-   ```bash
-   npm run dev
-   ```
+```
+kampus_etkinlik/
+  frontend/    React uygulaması (10 sayfa, React Router, Context, form doğrulama)
+  backend/     Express REST API (health, GET liste, GET tek, POST)
+  README.md
+```
 
-## 🗺️ Route Haritası
-- `/` - Ana Sayfa (HomePage)
-- `/events` - Tüm Etkinlikler (EventsPage)
-- `/events/:id` - Etkinlik Detayı (EventDetailPage)
-- `/admin` - Etkinlik Yönetimi (AdminPage)
-- `/admin/new` - Yeni Etkinlik Ekle (AddEventPage)
-- `/admin/:id/edit` - Etkinlik Güncelle (EditEventPage)
-- `/login` - Giriş Yap (LoginPage)
-- `/register` - Kayıt Ol (RegisterPage)
-- `/forgot-password` - Şifremi Unuttum (ForgotPasswordPage)
-- `*` - Sayfa Bulunamadı (NotFoundPage)
+## Frontend'i çalıştırma
 
+```bash
+cd frontend
+npm install
+npm run dev        # http://localhost:5173
+```
 
+**Özellikler (Sprint 6 · Vize):**
+- **React Router:** 10 sayfa ve dinamik adresler (`/events/:id`, `/admin/:id/edit`)
+- **Context API:** etkinlik listesi ile ekleme, güncelleme ve silme tek yerde
+- **Form doğrulama:** etkinlik formu, giriş, kayıt ve şifremi unuttum
+- **Responsive yönetim paneli:** masaüstünde tablo, mobilde kart görünümü
+
+| Adres | Sayfa |
+| --- | --- |
+| `/` | Ana Sayfa |
+| `/events` | Tüm Etkinlikler |
+| `/events/:id` | Etkinlik Detayı |
+| `/admin` | Etkinlik Yönetimi |
+| `/admin/new` | Yeni Etkinlik |
+| `/admin/:id/edit` | Etkinlik Güncelle |
+| `/login` | Giriş Yap |
+| `/register` | Kayıt Ol |
+| `/forgot-password` | Şifremi Unuttum |
+| `*` | Sayfa Bulunamadı |
+
+## Backend'i çalıştırma
+
+```bash
+cd backend
+npm install
+cp .env.example .env   # ilk kurulumda
+npm run dev            # http://localhost:3000
+```
+
+| Method | Endpoint | Başarılı | Hata |
+| --- | --- | --- | --- |
+| GET | `/health` | 200 | — |
+| GET | `/events` | 200 | — |
+| GET | `/events/:id` | 200 | 404 |
+| POST | `/events` | 201 | 400 |
+
+REST sözleşmesinin tamamı, PORT ayarı ve hata biçimi için: [backend/README.md](backend/README.md). Postman istekleri: `backend/requests/kampus-api.json`.
