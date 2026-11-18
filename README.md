@@ -4,19 +4,22 @@ Canlı site: https://burcuyalcin-frontend.vercel.app
 
 Burcu Yalçın · C2221031010
 
-Fakültedeki seminer, atölye, söyleşi ve yarışmaları listeleyen web uygulaması. Repoda iki ayrı uygulama var: arayüzü gösteren **frontend** ve etkinlikleri JSON olarak veren **backend**.
+Fakültedeki seminer, atölye, söyleşi ve yarışmaları listeleyen web uygulaması. Proje iki ayrı uygulamadan oluşur:
+
+- **Frontend:** React + TypeScript + Vite
+- **Backend:** Node.js + Express + MongoDB + Mongoose REST API
 
 | Klasör | Teknoloji | Adres | Durum |
 | --- | --- | --- | --- |
 | `frontend/` | React + TypeScript + Vite | `localhost:5173` · Vercel'de yayında | Sprint 4–6 |
-| `backend/` | Node.js + Express (REST API) | `localhost:3000` | Sprint 7 (canlıya alınmadı) |
+| `backend/` | Node.js + Express + MongoDB + Mongoose | `localhost:3000` | Sprint 8 |
 
 ## Repo yapısı
 
-```
-kampus_etkinlik/
-  frontend/    React uygulaması (10 sayfa, React Router, Context, form doğrulama)
-  backend/     Express REST API (health, GET liste, GET tek, POST)
+```text
+kampus-etkinlik/
+  frontend/    React uygulaması
+  backend/     Express + MongoDB REST API
   README.md
 ```
 
@@ -25,14 +28,23 @@ kampus_etkinlik/
 ```bash
 cd frontend
 npm install
-npm run dev        # http://localhost:5173
+npm run dev
 ```
 
-**Özellikler (Sprint 6 · Vize):**
-- **React Router:** 10 sayfa ve dinamik adresler (`/events/:id`, `/admin/:id/edit`)
-- **Context API:** etkinlik listesi ile ekleme, güncelleme ve silme tek yerde
-- **Form doğrulama:** etkinlik formu, giriş, kayıt ve şifremi unuttum
-- **Responsive yönetim paneli:** masaüstünde tablo, mobilde kart görünümü
+Frontend geliştirme adresi:
+
+```text
+http://localhost:5173
+```
+
+### Frontend özellikleri
+
+- React Router ile sayfa yönlendirmeleri
+- Context API ile etkinlik yönetimi
+- Etkinlik ekleme ve düzenleme formları
+- Form doğrulama
+- Responsive yönetim paneli
+- Etkinlik listeleme ve detay sayfaları
 
 | Adres | Sayfa |
 | --- | --- |
@@ -52,15 +64,80 @@ npm run dev        # http://localhost:5173
 ```bash
 cd backend
 npm install
-cp .env.example .env   # ilk kurulumda
-npm run dev            # http://localhost:3000
+cp .env.example .env
 ```
 
-| Method | Endpoint | Başarılı | Hata |
-| --- | --- | --- | --- |
-| GET | `/health` | 200 | — |
-| GET | `/events` | 200 | — |
-| GET | `/events/:id` | 200 | 404 |
-| POST | `/events` | 201 | 400 |
+`.env` dosyasında MongoDB bağlantı adresi tanımlanmalıdır:
 
-REST sözleşmesinin tamamı, PORT ayarı ve hata biçimi için: [backend/README.md](backend/README.md). Postman istekleri: `backend/requests/kampus-api.json`.
+```text
+PORT=3000
+MONGODB_URI=mongodb://127.0.0.1:27017/kampus
+```
+
+MongoDB Atlas kullanılıyorsa gerçek bağlantı adresi yalnızca `.env` dosyasına yazılır.
+
+İlk örnek verileri eklemek için:
+
+```bash
+npm run seed
+```
+
+Sunucuyu başlatmak için:
+
+```bash
+npm run dev
+```
+
+Backend geliştirme adresi:
+
+```text
+http://localhost:3000
+```
+
+## Backend özellikleri
+
+- Express REST API
+- MongoDB Atlas bağlantısı
+- Mongoose Schema ve Model
+- Kalıcı etkinlik verileri
+- 6 kayıtlık seed verisi
+- MongoDB tarafından oluşturulan `_id`
+- Schema doğrulaması
+- Merkezi hata middleware'i
+- Kategoriye göre etkinlik filtreleme
+
+## API
+
+| Method | Endpoint | Açıklama | Başarılı | Hata |
+| --- | --- | --- | --- | --- |
+| GET | `/health` | Sunucu kontrolü | 200 | — |
+| GET | `/events` | Etkinlikleri listele | 200 | — |
+| GET | `/events/:id` | Tek etkinliği getir | 200 | 404 |
+| POST | `/events` | Yeni etkinlik oluştur | 201 | 400 |
+
+Etkinlikler artık bellekte değil MongoDB'de saklanır. Bu nedenle POST ile oluşturulan kayıtlar sunucu kapatılıp yeniden başlatıldığında korunur.
+
+Backend ayrıntıları için:
+
+```text
+backend/README.md
+```
+
+Postman collection:
+
+```text
+backend/requests/kampus-api.json
+```
+
+## Güvenlik
+
+Gerçek MongoDB bağlantı adresi ve şifre GitHub'a gönderilmez.
+
+Aşağıdakiler `.gitignore` ile repository dışında tutulur:
+
+```text
+.env
+node_modules/
+```
+
+Repository'de yalnızca örnek ortam değişkenlerini içeren `.env.example` bulunur.
