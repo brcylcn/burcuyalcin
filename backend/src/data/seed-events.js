@@ -3,7 +3,7 @@ export const seedEvents = [
     title: "Bulut Bilişime Giriş Semineri",
     category: "Seminer",
     capacity: 120,
-    date: "2026-11-20",
+    date: "20-11-2026",
     time: "14:00",
     location: "Mühendislik Fakültesi Mavi Salon",
     description:
@@ -13,7 +13,7 @@ export const seedEvents = [
     title: "Flutter ile Mobil Uygulama Atölyesi",
     category: "Atölye",
     capacity: 25,
-    date: "2026-11-25",
+    date: "10-11-2026",
     time: "10:30",
     location: "Yazılım Laboratuvarı 3",
     description:
@@ -23,7 +23,7 @@ export const seedEvents = [
     title: "Oyun Sektöründe Kariyer Söyleşisi",
     category: "Söyleşi",
     capacity: 60,
-    date: "2026-12-02",
+    date: "02-12-2026",
     time: "15:00",
     location: "Kongre Merkezi Salon B",
     description:
@@ -33,7 +33,7 @@ export const seedEvents = [
     title: "Veri Görselleştirme Atölyesi",
     category: "Atölye",
     capacity: 30,
-    date: "2026-12-09",
+    date: "09-12-2026",
     time: "13:00",
     location: "Merkez Kütüphane Grup Çalışma Odası",
     description:
@@ -43,7 +43,7 @@ export const seedEvents = [
     title: "Akıllı Kampüs Hackathonu",
     category: "Yarışma",
     capacity: 40,
-    date: "2026-12-16",
+    date: "16-12-2026",
     time: "09:00",
     location: "Teknokent İnovasyon Merkezi",
     description:
@@ -53,7 +53,7 @@ export const seedEvents = [
     title: "Açık Kaynağa Katkı Semineri",
     category: "Seminer",
     capacity: 80,
-    date: "2026-12-23",
+    date: "23-12-2026",
     time: "11:00",
     location: "Fen Fakültesi Amfi 4",
     description:
