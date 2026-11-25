@@ -1,10 +1,10 @@
-# Kampüs Etkinlikleri · Backend (Sprint 8)
+# Kampüs Etkinlikleri · Backend (Sprint 9)
 
 Burcu Yalçın · C2221031010
 
 Node.js, Express, MongoDB ve Mongoose kullanılarak geliştirilmiş Kampüs Etkinlikleri REST API'sidir.
 
-Sprint 7'de etkinlikler JavaScript dizisinde ve bellekte tutuluyordu. Sprint 8 ile birlikte veriler MongoDB'ye taşındı. Bu nedenle sunucu kapatılıp yeniden başlatıldığında POST ile eklenen etkinlikler kaybolmaz.
+Sprint 9 ile API tam CRUD yapısına yaklaşmıştır. Etkinlikler MongoDB'de kalıcı olarak tutulur; güncellenebilir, silinebilir, aranabilir, kategoriye göre filtrelenebilir ve yaklaşan etkinlikler ayrı listelenebilir.
 
 ## Kullanılan teknolojiler
 
@@ -15,6 +15,7 @@ Sprint 7'de etkinlikler JavaScript dizisinde ve bellekte tutuluyordu. Sprint 8 i
 - Mongoose
 - dotenv
 - cors
+- Newman
 
 ## Proje yapısı
 
@@ -31,11 +32,14 @@ backend/
       event-model.js
     routes/
       event-routes.js
+    utils/
+      date.js
     app.js
     seed.js
     server.js
   requests/
     kampus-api.json
+    run-results.json
   .env.example
   .gitignore
   package.json
@@ -43,80 +47,24 @@ backend/
 
 ## Kurulum
 
-Backend klasörüne girin:
-
 ```bash
 cd backend
-```
-
-Paketleri yükleyin:
-
-```bash
 npm install
-```
-
-Örnek ortam değişkeni dosyasını kopyalayın:
-
-```bash
 cp .env.example .env
 ```
 
-`.env.example` içeriği:
+`.env.example`:
 
 ```text
 PORT=3000
 MONGODB_URI=mongodb://127.0.0.1:27017/kampus
 ```
 
-MongoDB Atlas kullanılacaksa gerçek bağlantı URI'si yalnızca yerel `.env` dosyasına yazılmalıdır.
+Gerçek MongoDB Atlas URI'si yalnızca yerel `.env` dosyasında tutulmalıdır.
 
-Gerçek MongoDB kullanıcı adı, şifresi veya bağlantı adresi hiçbir zaman README, `.env.example`, Postman collection veya kaynak kod içine yazılmamalıdır.
+## Seed
 
-## Ortam değişkenleri
-
-| Değişken | Açıklama |
-| --- | --- |
-| `PORT` | Express sunucusunun çalışacağı port |
-| `MONGODB_URI` | MongoDB bağlantı adresi |
-
-`.env` dosyası GitHub'a gönderilmez.
-
-## Veritabanı bağlantısı
-
-MongoDB bağlantısı ayrı bir modülde bulunur:
-
-```text
-src/config/database.js
-```
-
-Bağlantı adresi:
-
-```js
-process.env.MONGODB_URI
-```
-
-üzerinden okunur.
-
-Uygulama önce MongoDB bağlantısını kurar, ardından Express sunucusunu başlatır.
-
-Başarılı bağlantıda terminalde buna benzer bir çıktı görülür:
-
-```text
-MongoDB bağlandı (Atlas): <host>/kampus
-API: http://localhost:3000
-```
-
-Gerçek bağlantı URI'si terminale yazdırılmaz.
-
-## Seed verileri
-
-Projede 6 örnek etkinlik bulunur:
-
-```text
-src/data/seed-events.js
-```
-
-Veritabanını örnek verilerle doldurmak için:
+Veritabanını 6 örnek etkinlikle doldurmak için:
 
 ```bash
 npm run seed
@@ -124,54 +72,49 @@ npm run seed
 
 Seed işlemi önce mevcut etkinlikleri siler, ardından 6 örnek etkinliği yeniden ekler.
 
-Bu nedenle komut iki kez çalıştırıldığında kayıt sayısı 12 olmaz; yine 6 kayıt bulunur.
-
-```bash
-npm run seed
-npm run seed
-```
-
-Beklenen çıktı:
-
-```text
-6 etkinlik eklendi
-```
-
-MongoDB `_id` alanını otomatik oluşturur. Seed verilerinde manuel `id` alanı kullanılmaz.
+Seed verilerinde geçmiş ve gelecek tarihli etkinlikler bulunur. Böylece `/events/upcoming` endpoint'i test edilebilir.
 
 ## Sunucuyu çalıştırma
-
-Geliştirme modunda:
 
 ```bash
 npm run dev
 ```
 
-Normal başlatma:
-
-```bash
-npm start
-```
-
-Sunucu:
+Adres:
 
 ```text
 http://localhost:3000
 ```
 
-Health-check:
+## Tarih sistemi
+
+API'de tarihler:
 
 ```text
-http://localhost:3000/health
+GG-AA-YYYY
 ```
 
-## Komutlar
+biçiminde kullanılır.
 
-| Komut | Açıklama |
-| --- | --- |
-| `npm run dev` | Sunucuyu watch modunda başlatır |
-| `npm start` | Sunucuyu normal olarak başlatır |
-| `npm run seed` | MongoDB'yi 6 örnek etkinlikle yeniden doldurur |
+Örnek:
+
+```text
+15-10-2026
+```
+
+MongoDB tarafında ise tarih gerçek `Date` olarak saklanır.
+
+Dönüşüm işlemleri:
+
+```text
+src/utils/date.js
+```
+
+dosyasında yapılır.
+
+- `parseDate()` → `GG-AA-YYYY` değerini `Date` nesnesine çevirir.
+- `formatDate()` → MongoDB Date değerini tekrar `GG-AA-YYYY` biçiminde döndürür.
+- `todayStart()` → yaklaşan etkinlik sorgusu için bugünün başlangıcını üretir.
 
 ## Event Schema
 
@@ -181,16 +124,14 @@ Mongoose modeli:
 src/models/event-model.js
 ```
 
-Etkinlik alanları:
-
 | Alan | Kural |
 | --- | --- |
 | `title` | Zorunlu, trim, 3–100 karakter |
 | `category` | Zorunlu, enum |
 | `capacity` | Minimum 0, varsayılan 0 |
-| `date` | Zorunlu |
+| `date` | Zorunlu, Date |
 | `time` | Varsayılan boş metin |
-| `location` | Trim, varsayılan boş metin |
+| `location` | Trim |
 | `description` | Trim, maksimum 500 karakter |
 
 Geçerli kategoriler:
@@ -202,109 +143,71 @@ Söyleşi
 Yarışma
 ```
 
-Schema'da:
-
-```js
-timestamps: true
-```
-
-kullanıldığı için MongoDB kayıtlarında otomatik olarak:
-
-```text
-createdAt
-updatedAt
-```
-
-alanları bulunur.
+Schema'da `timestamps: true` kullanıldığı için `createdAt` ve `updatedAt` otomatik oluşturulur.
 
 ## REST API
 
 | Method | Endpoint | Amaç | Başarılı | Hata |
 | --- | --- | --- | --- | --- |
 | GET | `/health` | Sunucu kontrolü | 200 | — |
-| GET | `/events` | Etkinlikleri getir | 200 | — |
-| GET | `/events/:id` | Tek etkinliği getir | 200 | 404 |
-| POST | `/events` | Yeni etkinlik oluştur | 201 | 400 |
-
-## GET /health
-
-İstek:
-
-```text
-GET http://localhost:3000/health
-```
-
-Örnek yanıt:
-
-```json
-{
-  "status": "ok",
-  "time": "2026-11-18T06:37:58.261Z",
-  "student": "C2221031010"
-}
-```
+| GET | `/events?search=&category=` | Listeleme, arama ve filtreleme | 200 | — |
+| GET | `/events/upcoming` | Yaklaşan etkinlikler | 200 | — |
+| GET | `/events/:id` | Tek etkinlik | 200 | 404 |
+| POST | `/events` | Etkinlik oluştur | 201 | 400 |
+| PATCH | `/events/:id` | Etkinlik güncelle | 200 | 400, 404 |
+| DELETE | `/events/:id` | Etkinlik sil | 204 | 404 |
 
 ## GET /events
 
-İstek:
+Tüm etkinlikleri tarihe göre sıralı getirir.
 
 ```text
-GET http://localhost:3000/events
+GET /events
 ```
 
-Seed işleminden sonra 6 etkinlik döner.
+### Arama
 
-Kategori filtresi isteğe bağlıdır:
+Başlıkta büyük/küçük harf duyarsız arama:
+
+```text
+GET /events?search=atölye
+```
+
+### Kategori filtresi
 
 ```text
 GET /events?category=Atölye
 ```
 
-Etkinlikler MongoDB'den okunur ve tarihe göre sıralanır.
+### Arama + kategori
 
-Örnek kayıt:
-
-```json
-{
-  "_id": "MongoDB tarafından oluşturulan id",
-  "title": "Bulut Bilişime Giriş Semineri",
-  "category": "Seminer",
-  "capacity": 120,
-  "date": "2026-11-20",
-  "time": "14:00",
-  "location": "Mühendislik Fakültesi Mavi Salon",
-  "description": "Bulutta ilk sanal sunucunu kurmak için bilmen gereken temel kavramlar.",
-  "createdAt": "MongoDB timestamp",
-  "updatedAt": "MongoDB timestamp"
-}
+```text
+GET /events?search=atölye&category=Atölye
 ```
+
+## GET /events/upcoming
+
+Bugün ve sonrasındaki etkinlikleri en yakın tarihten başlayarak getirir:
+
+```text
+GET /events/upcoming
+```
+
+Geçmiş tarihli seed kayıtları bu listede bulunmaz.
 
 ## GET /events/:id
 
-Sprint 7'de kullanılan:
+MongoDB `_id` değeri kullanılır:
 
 ```text
-event-1
-event-2
+GET /events/<mongodb_id>
 ```
 
-gibi ID'ler artık kullanılmaz.
-
-Önce `GET /events` ile etkinlik listesi alınır ve istenen kaydın MongoDB `_id` değeri kopyalanır.
-
-İstek:
+Geçersiz veya bulunamayan id:
 
 ```text
-GET http://localhost:3000/events/<mongodb_id>
+404 Not Found
 ```
-
-Kayıt bulunursa:
-
-```text
-200 OK
-```
-
-Kayıt yoksa:
 
 ```json
 {
@@ -314,165 +217,191 @@ Kayıt yoksa:
 }
 ```
 
-ve:
-
-```text
-404 Not Found
-```
-
-döner.
-
-Geçersiz MongoDB ObjectId değerleri de 500 yerine 404 döner.
-
-Örnek:
-
-```text
-GET /events/yok
-```
-
-Sonuç:
-
-```text
-404 Not Found
-```
-
 ## POST /events
 
-İstek:
-
 ```text
-POST http://localhost:3000/events
+POST /events
 ```
 
-Örnek body:
+Örnek:
 
 ```json
 {
   "title": "Git Atölyesi",
   "category": "Atölye",
-  "date": "2026-12-01",
+  "date": "20-12-2026",
   "capacity": 30
 }
 ```
 
-Başarılı olduğunda:
+Başarılı:
 
 ```text
 201 Created
 ```
 
-döner ve MongoDB tarafından otomatik `_id`, `createdAt` ve `updatedAt` alanları oluşturulur.
-
-## Validation
-
-`title`, `category` ve `date` zorunludur.
-
-Örneğin yalnızca:
-
-```json
-{
-  "title": "Git Atölyesi"
-}
-```
-
-gönderilirse Mongoose schema doğrulaması başarısız olur ve:
+Eksik veya geçersiz veri:
 
 ```text
 400 Bad Request
 ```
 
-döner.
+Yanlış tarih biçimi de 400 döner.
 
-Hata biçimi:
+Örneğin:
+
+```text
+2026-12-20
+```
+
+yerine:
+
+```text
+20-12-2026
+```
+
+kullanılmalıdır.
+
+## PATCH /events/:id
+
+PATCH yalnızca gönderilen alanları değiştirir.
+
+Örnek:
+
+```json
+{
+  "capacity": 55
+}
+```
+
+Başarılı:
+
+```text
+200 OK
+```
+
+ve güncellenmiş kayıt döner.
+
+Güncellemede schema doğrulaması çalışır.
+
+Örneğin:
+
+```json
+{
+  "category": "Parti"
+}
+```
+
+400 döner.
+
+Boş body:
+
+```json
+{}
+```
+
+400 döner:
 
 ```json
 {
   "error": {
-    "message": "Event validation failed: ..."
+    "message": "Body is empty"
   }
 }
 ```
 
-Validation hatası sunucuyu durdurmaz.
+Aşağıdaki alanlar PATCH ile değiştirilemez:
 
-## Hata yönetimi
-
-Eşleşmeyen route'lar:
-
-```json
-{
-  "error": {
-    "message": "Route not found"
-  }
-}
+```text
+_id
+createdAt
+updatedAt
+__v
 ```
 
-ile 404 döner.
+## DELETE /events/:id
 
-Beklenmeyen sunucu hataları merkezi Express error middleware'i tarafından yakalanır ve istemciye:
-
-```json
-{
-  "error": {
-    "message": "Server error"
-  }
-}
+```text
+DELETE /events/<mongodb_id>
 ```
 
-yanıtı gönderilir.
+Başarılı silme:
 
-## Kalıcılık testi
+```text
+204 No Content
+```
 
-MongoDB entegrasyonunu doğrulamak için:
+204 yanıtında gövde bulunmaz.
 
-1. `npm run seed` çalıştırılır.
-2. `npm run dev` ile sunucu başlatılır.
-3. `POST /events` ile yeni etkinlik eklenir.
-4. Sunucu `Ctrl + C` ile kapatılır.
-5. `npm run dev` ile tekrar başlatılır.
-6. `GET /events` çalıştırılır.
+Aynı kayıt tekrar silinirse:
 
-POST ile eklenen etkinlik listede hâlâ bulunuyorsa MongoDB kalıcılığı çalışıyor demektir.
+```text
+404 Not Found
+```
 
-## Postman
+Geçersiz id de 404 döner.
 
-Postman collection:
+## Route sırası
+
+`/events/upcoming`, `/:id` route'undan önce tanımlanmıştır.
+
+Doğru sıra:
+
+```text
+GET /
+GET /upcoming
+GET /:id
+POST /
+PATCH /:id
+DELETE /:id
+```
+
+Böylece Express `"upcoming"` kelimesini MongoDB id'si olarak değerlendirmez.
+
+## Postman ve Newman
+
+Sprint 9 collection:
 
 ```text
 requests/kampus-api.json
 ```
 
-Postman'de **Import** ile açılabilir.
+Runner sonucu:
 
-Collection'da 6 temel istek bulunur:
+```text
+requests/run-results.json
+```
 
-| # | İstek | Beklenen |
-| --- | --- | --- |
-| 1 | GET `/health` | 200 |
-| 2 | GET `/events` | 200 |
-| 3 | GET `/events/<mongodb_id>` | 200 |
-| 4 | GET `/events/yok` | 404 |
-| 5 | POST `/events` (tam body) | 201 |
-| 6 | POST `/events` (eksik body) | 400 |
+Hocanın otomatik testi:
 
-Tek etkinlik isteğinde `_id`, `GET /events` sonucundan kopyalanmalıdır.
+```bash
+newman run https://webdersi.vercel.app/test.json
+```
+
+Beklenen sonuç:
+
+```text
+18 istek
+45 test
+0 hata
+```
+
+Sprint 9 testi Newman ve Postman Collection Runner ile başarıyla çalıştırılmıştır.
 
 ## Güvenlik
 
-GitHub repository'sinde bulunmaması gerekenler:
+GitHub'da bulunmaması gerekenler:
 
 ```text
 .env
 node_modules/
 ```
 
-Gerçek Atlas URI'si ve veritabanı şifresi aşağıdaki dosyalara yazılmamalıdır:
+Gerçek MongoDB Atlas kullanıcı adı, şifresi ve bağlantı URI'si aşağıdaki yerlere yazılmaz:
 
 ```text
-README.md
+README
 .env.example
 Postman collection
 kaynak kod
 ```
-
-Repository'de yalnızca örnek bağlantı bilgisini içeren `.env.example` tutulur.

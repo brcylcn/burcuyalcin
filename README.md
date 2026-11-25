@@ -12,7 +12,7 @@ Fakültedeki seminer, atölye, söyleşi ve yarışmaları listeleyen web uygula
 | Klasör | Teknoloji | Adres | Durum |
 | --- | --- | --- | --- |
 | `frontend/` | React + TypeScript + Vite | `localhost:5173` · Vercel'de yayında | Sprint 4–6 |
-| `backend/` | Node.js + Express + MongoDB + Mongoose | `localhost:3000` | Sprint 8 |
+| `backend/` | Node.js + Express + MongoDB + Mongoose | `localhost:3000` | Sprint 9 |
 
 ## Repo yapısı
 
@@ -37,54 +37,13 @@ Frontend geliştirme adresi:
 http://localhost:5173
 ```
 
-### Frontend özellikleri
-
-- React Router ile sayfa yönlendirmeleri
-- Context API ile etkinlik yönetimi
-- Etkinlik ekleme ve düzenleme formları
-- Form doğrulama
-- Responsive yönetim paneli
-- Etkinlik listeleme ve detay sayfaları
-
-| Adres | Sayfa |
-| --- | --- |
-| `/` | Ana Sayfa |
-| `/events` | Tüm Etkinlikler |
-| `/events/:id` | Etkinlik Detayı |
-| `/admin` | Etkinlik Yönetimi |
-| `/admin/new` | Yeni Etkinlik |
-| `/admin/:id/edit` | Etkinlik Güncelle |
-| `/login` | Giriş Yap |
-| `/register` | Kayıt Ol |
-| `/forgot-password` | Şifremi Unuttum |
-| `*` | Sayfa Bulunamadı |
-
 ## Backend'i çalıştırma
 
 ```bash
 cd backend
 npm install
 cp .env.example .env
-```
-
-`.env` dosyasında MongoDB bağlantı adresi tanımlanmalıdır:
-
-```text
-PORT=3000
-MONGODB_URI=mongodb://127.0.0.1:27017/kampus
-```
-
-MongoDB Atlas kullanılıyorsa gerçek bağlantı adresi yalnızca `.env` dosyasına yazılır.
-
-İlk örnek verileri eklemek için:
-
-```bash
 npm run seed
-```
-
-Sunucuyu başlatmak için:
-
-```bash
 npm run dev
 ```
 
@@ -94,36 +53,83 @@ Backend geliştirme adresi:
 http://localhost:3000
 ```
 
-## Backend özellikleri
+`.env` dosyasında MongoDB bağlantısı tanımlanmalıdır:
 
-- Express REST API
-- MongoDB Atlas bağlantısı
-- Mongoose Schema ve Model
-- Kalıcı etkinlik verileri
-- 6 kayıtlık seed verisi
-- MongoDB tarafından oluşturulan `_id`
-- Schema doğrulaması
-- Merkezi hata middleware'i
-- Kategoriye göre etkinlik filtreleme
+```text
+PORT=3000
+MONGODB_URI=mongodb://127.0.0.1:27017/kampus
+```
+
+MongoDB Atlas kullanılıyorsa gerçek bağlantı adresi yalnızca `.env` dosyasına yazılır.
+
+## Sprint 9 özellikleri
+
+- MongoDB ve Mongoose ile kalıcı veri
+- PATCH ile kısmi etkinlik güncelleme
+- DELETE ile etkinlik silme
+- `?search=` ile başlıkta arama
+- `?category=` ile kategori filtresi
+- `/events/upcoming` ile yaklaşan etkinlikleri listeleme
+- API tarih biçimi: `GG-AA-YYYY`
+- MongoDB içinde tarihlerin gerçek `Date` olarak tutulması
+- Mongoose schema doğrulaması
+- Geçersiz veya bulunamayan id için 404
+- DELETE başarılı olduğunda 204 No Content
+- Newman ve Postman Runner ile otomatik test
 
 ## API
 
 | Method | Endpoint | Açıklama | Başarılı | Hata |
 | --- | --- | --- | --- | --- |
 | GET | `/health` | Sunucu kontrolü | 200 | — |
-| GET | `/events` | Etkinlikleri listele | 200 | — |
+| GET | `/events?search=&category=` | Listeleme, arama ve filtreleme | 200 | — |
+| GET | `/events/upcoming` | Yaklaşan etkinlikleri listele | 200 | — |
 | GET | `/events/:id` | Tek etkinliği getir | 200 | 404 |
 | POST | `/events` | Yeni etkinlik oluştur | 201 | 400 |
+| PATCH | `/events/:id` | Etkinliği güncelle | 200 | 400, 404 |
+| DELETE | `/events/:id` | Etkinliği sil | 204 | 404 |
 
-Etkinlikler artık bellekte değil MongoDB'de saklanır. Bu nedenle POST ile oluşturulan kayıtlar sunucu kapatılıp yeniden başlatıldığında korunur.
+## Tarih biçimi
 
-Backend ayrıntıları için:
+API'de tarihler:
 
 ```text
-backend/README.md
+GG-AA-YYYY
 ```
 
-Postman collection:
+biçimindedir.
+
+Örnek:
+
+```text
+20-12-2026
+```
+
+MongoDB'de tarihler gerçek `Date` olarak saklanır. Böylece sıralama ve yaklaşan etkinlik sorguları doğru çalışır.
+
+## Test
+
+Sprint 9 otomatik testi:
+
+```bash
+newman run https://webdersi.vercel.app/test.json
+```
+
+Beklenen sonuç:
+
+```text
+18 istek
+45 test
+0 hata
+```
+
+Runner sonucu:
+
+```text
+backend/requests/run-results.json
+```
+
+Sprint 9 Postman collection:
 
 ```text
 backend/requests/kampus-api.json
@@ -133,7 +139,7 @@ backend/requests/kampus-api.json
 
 Gerçek MongoDB bağlantı adresi ve şifre GitHub'a gönderilmez.
 
-Aşağıdakiler `.gitignore` ile repository dışında tutulur:
+GitHub'da bulunmaması gerekenler:
 
 ```text
 .env
@@ -141,3 +147,9 @@ node_modules/
 ```
 
 Repository'de yalnızca örnek ortam değişkenlerini içeren `.env.example` bulunur.
+
+Backend ayrıntıları için:
+
+```text
+backend/README.md
+```
